@@ -1,43 +1,37 @@
-const express = require("express");
-const venom = require("venom-bot");
-const app = express();
+import { create } from 'venom-bot';
+import express from 'express';
 
+const app = express();
 app.use(express.json());
 
-let client;
+let clientInstance = null;
 
-venom
-  .create(
-    'session',
-    undefined,
-    (status, session) => console.log('Status:', status),
-    {
-      headless: true,
-      useChrome: false,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    }
-  )
-  .then((venomClient) => {
-    client = venomClient;
-
-    app.post("/send", async (req, res) => {
-      const { number, message } = req.body;
-
-      if (!number || !message) {
-        return res.status(400).json({ error: "Numero e messaggio obbligatori" });
-      }
-
-      try {
-        await client.sendText(`${number}@c.us`, message);
-        res.json({ success: true });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
-      }
-    });
-
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-      console.log("Server attivo sulla porta", PORT);
-    });
+create({
+  session: 'whatsapp-session',
+  headless: true,
+})
+  .then((client) => {
+    clientInstance = client;
+    console.log('✅ WhatsApp pronto!');
   })
-  .catch((e) => console.error("Errore avvio Venom:", e));
+  .catch((err) => {
+    console.error('Errore avvio Venom:', err);
+  });
+
+app.post('/send', async (req, res) => {
+  const { to, message } = req.body;
+
+  if (!clientInstance) {
+    return res.status(500).json({ error: 'Client WhatsApp non pronto' });
+  }
+
+  try {
+    await clientInstance.sendText(to, message);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server attivo sulla porta ${PORT}`));
