@@ -1,0 +1,13 @@
+{
+  "name": "venom-server",
+  "version": "1.0.0",
+  "description": "Server WhatsApp con Venom per Railway",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "venom-bot": "^5.0.2"
+  }
+}
