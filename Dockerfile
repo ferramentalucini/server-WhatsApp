@@ -1,6 +1,6 @@
 FROM node:18
 
-# Install Chromium and dependencies
+# Installa Chromium e dipendenze
 RUN apt-get update && apt-get install -y \
   wget \
   curl \
@@ -26,13 +26,15 @@ RUN apt-get update && apt-get install -y \
   --no-install-recommends && \
   rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# Imposta la cartella del progetto
 WORKDIR /app
 
-# Copy project files
+# Installa le dipendenze
 COPY package*.json ./
 RUN npm install
+
+# Copia i file
 COPY . .
 
-# Start server
-CMD ["npm", "start"]
+# Avvia il server
+CMD ["node", "index.js"]
