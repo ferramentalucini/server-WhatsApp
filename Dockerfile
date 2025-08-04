@@ -1,7 +1,8 @@
-FROM node:18
+FROM node:20.18.1
 
-# Installa Chromium e dipendenze
+# Installa Chromium e librerie necessarie + libvips per sharp
 RUN apt-get update && apt-get install -y \
+  chromium \
   wget \
   curl \
   gnupg \
@@ -23,18 +24,26 @@ RUN apt-get update && apt-get install -y \
   libxshmfence1 \
   fonts-liberation \
   xdg-utils \
+  libvips \
+  libvips-dev \
   --no-install-recommends && \
+  apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-# Imposta la cartella del progetto
+# Evita che puppeteer scarichi Chromium (se non usato direttamente)
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+
+# Imposta directory di lavoro
 WORKDIR /app
 
-# Installa le dipendenze
+# Copia i file package
 COPY package*.json ./
-RUN npm install
 
-# Copia i file
+# Installa le dipendenze
+RUN npm install --verbose
+
+# Copia il resto del progetto
 COPY . .
 
 # Avvia il server
-CMD ["node", "index.js"]
+CMD ["npm", "start"]
